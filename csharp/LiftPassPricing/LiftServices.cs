@@ -76,23 +76,15 @@ public class LiftServices
                     }
                     else
                     {
-                        if (age == null)
+                        if (age == null || age <= 64)
                         {
                             double cost = result * (1 - reduction / 100.0);
                             return "{ \"cost\": " + (int)Math.Ceiling(cost) + "}";
                         }
                         else
                         {
-                            if (age > 64)
-                            {
-                                double cost = result * .75 * (1 - reduction / 100.0);
-                                return "{ \"cost\": " + (int)Math.Ceiling(cost) + "}";
-                            }
-                            else
-                            {
-                                double cost = result * (1 - reduction / 100.0);
-                                return "{ \"cost\": " + (int)Math.Ceiling(cost) + "}";
-                            }
+                            double cost = result * .75 * (1 - reduction / 100.0);
+                            return "{ \"cost\": " + (int)Math.Ceiling(cost) + "}";
                         }
                     }
                 }
