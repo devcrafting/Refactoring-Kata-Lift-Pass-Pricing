@@ -19,25 +19,25 @@ public class LiftPricer : IPriceLift
         {
             return 0;
         }
-        var reduction = 0;
-
-        if (date.HasValue && !isHolidays && (int)date.Value.DayOfWeek == 1)
-        {
-            reduction = 35;
-        }
 
         if (age != null && age < 15)
         {
             return (int)Math.Ceiling(basePrice * .7);
         }
 
-        if (age == null || age <= 64)
+        var reduction = 0;
+        if (date.HasValue && !isHolidays && (int)date.Value.DayOfWeek == 1)
         {
-            var cost1 = basePrice * (1 - reduction / 100.0);
-            return (int)Math.Ceiling(cost1);
+            reduction = 35;
         }
 
-        var cost = basePrice * .75 * (1 - reduction / 100.0);
+        var ratio = 1d;
+        if (age != null && age > 64)
+        {
+            ratio = 0.75;
+        }
+
+        var cost = basePrice * ratio * (1 - reduction / 100.0);
         return (int)Math.Ceiling(cost);
     }
 }
