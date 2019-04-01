@@ -9,7 +9,7 @@ using ApprovalTests.Reporters;
 
 public class LiftServicesShould
 {
-    private readonly LiftServices liftServices;
+    private readonly IStoreLiftPricer liftPricerRepository;
 
     public Random random { get; }
 
@@ -20,7 +20,7 @@ public class LiftServicesShould
                 ConnectionString = @"Database=lift_pass;Data Source=localhost;User Id=root;Password=mysql"
             };
         connection.Open();
-        liftServices = new LiftServices(connection, new LiftPricerRepository(connection));
+        liftPricerRepository = new LiftPricerRepository(connection);
         random = new Random(1); 
     }
 
@@ -38,8 +38,8 @@ public class LiftServicesShould
                     var date = new DateTime(random.Next(2017, 2019), random.Next(1, 12), random.Next(1, 28));
                     return new [] {
                         $"- {age}, {type}, {date.ToString("yyyy-MM-dd")}\n",
-                        liftServices.GetPrice(age, type, date) + "\n",
-                        liftServices.GetPrice(age, type, DateTime.Parse("2019-02-18")) + "\n"
+                        liftPricerRepository.Get(type, date).GetPrice(age) + "\n",
+                        liftPricerRepository.Get(type, DateTime.Parse("2019-02-18")).GetPrice(age) + "\n"
                     };
                 }));
 

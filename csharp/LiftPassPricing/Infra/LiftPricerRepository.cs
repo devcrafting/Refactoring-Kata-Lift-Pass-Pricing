@@ -1,7 +1,7 @@
 using System;
 using MySql.Data.MySqlClient;
 
-public class LiftPricerRepository : ILoadLiftPricer
+public class LiftPricerRepository : IStoreLiftPricer
 {
     private readonly MySqlConnection connection;
 
@@ -15,6 +15,19 @@ public class LiftPricerRepository : ILoadLiftPricer
         if (type.ToString() == "night")
             return new NightLiftPricer(date, GetBasePrice(type));
         return new LiftPricer(date, IsHolidays(date), GetBasePrice(type));
+    }
+
+    public void Add(string liftPassType, int liftPassCost)
+    {
+        using (var command = new MySqlCommand( //
+                "INSERT INTO base_price (type, cost) VALUES (@type, @cost) " + //
+                "ON DUPLICATE KEY UPDATE cost = @cost;", connection))
+        {
+            command.Parameters.AddWithValue("@type", liftPassType);
+            command.Parameters.AddWithValue("@cost", liftPassCost);
+            command.Prepare();
+            command.ExecuteNonQuery();
+        }
     }
 
     private bool IsHolidays(DateTime? date)
