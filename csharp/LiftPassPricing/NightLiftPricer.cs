@@ -3,30 +3,30 @@ using System;
 internal class NightLiftPricer : IPriceLift
 {
     private DateTime? date;
-    private double basePrice;
+    private int basePrice;
 
-    public NightLiftPricer(DateTime? date, double basePrice)
+    public NightLiftPricer(DateTime? date, int basePrice)
     {
         this.date = date;
         this.basePrice = basePrice;
     }
 
-    public string GetPrice(int? age)
+    public int GetPrice(int? age)
     {
         if (age != null && age >= 6)
         {
             if (age > 64)
             {
-                return "{ \"cost\": " + (int)Math.Ceiling(basePrice * .4) + "}";
+                return (int)Math.Ceiling(basePrice * .4);
             }
             else
             {
-                return "{ \"cost\": " + basePrice + "}";
+                return basePrice;
             }
         }
         else
         {
-            return "{ \"cost\": 0}";
+            return 0;
         }
     }
 }

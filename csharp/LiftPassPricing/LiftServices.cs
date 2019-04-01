@@ -17,7 +17,7 @@ public class LiftServices
     public string GetPrice(int? age, object type, DateTime? date)
     {
         var liftPricer = liftPricerLoader.Get(type, date);
-        return liftPricer.GetPrice(age);
+        return $"{{ \"cost\": {liftPricer.GetPrice(age)}}}";
     }
 
     public string AddPrice(string liftPassType, int liftPassCost)

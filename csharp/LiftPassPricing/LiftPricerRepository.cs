@@ -33,25 +33,21 @@ public class LiftPricerRepository : ILoadLiftPricer
                         return true;
                     }
                 }
-
             }
         }
 
         return false;
     }
 
-    private double GetBasePrice(object type)
+    private int GetBasePrice(object type)
     {
-        double basePrice;
         using (var costCmd = new MySqlCommand( //
     "SELECT cost FROM base_price " + //
     "WHERE type = @type", connection))
         {
             costCmd.Parameters.AddWithValue("@type", type);
             costCmd.Prepare();
-            basePrice = (int)costCmd.ExecuteScalar();
+            return (int)costCmd.ExecuteScalar();
         }
-
-        return basePrice;
     }
 }
