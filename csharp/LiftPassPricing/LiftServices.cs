@@ -12,102 +12,103 @@ public class LiftServices
         this.connection = connection;
     }
 
-    public string GetPrice(int? age, object type, dynamic date)
+    public string GetPrice(int? age, object type, DateTime? date)
     {
-        using (var costCmd = new MySqlCommand( //
-            "SELECT cost FROM base_price " + //
-            "WHERE type = @type", connection))
+        double basePrice = GetBasePrice(type);
+
+        if (age != null && age < 6)
         {
-            costCmd.Parameters.AddWithValue("@type", type);
-            costCmd.Prepare();
-            double result = (int)costCmd.ExecuteScalar();
+            return "{ \"cost\": 0}";
+        }
+        else
+        {
+            var reduction = 0;
 
-            int reduction;
-            var isHoliday = false;
-
-            if (age != null && age < 6)
+            if (!"night".Equals(type))
             {
-                return "{ \"cost\": 0}";
-            }
-            else
-            {
-                reduction = 0;
+                var isHoliday = IsHolidays(date);
 
-                if (!"night".Equals(type))
+                if (date.HasValue && !isHoliday && (int)date.Value.DayOfWeek == 1)
                 {
-                    using (var holidayCmd = new MySqlCommand( //
-                        "SELECT * FROM holidays", connection))
+                    reduction = 35;
+                }
+
+                // TODO apply reduction for others
+                if (age != null && age < 15)
+                {
+                    return "{ \"cost\": " + (int)Math.Ceiling(basePrice * .7) + "}";
+                }
+                else
+                {
+                    if (age == null || age <= 64)
                     {
-                        holidayCmd.Prepare();
-                        using (var holidays = holidayCmd.ExecuteReader())
-                        {
-
-                            while (holidays.Read())
-                            {
-                                var holiday = holidays.GetDateTime("holiday");
-                                if (date != null)
-                                {
-                                    DateTime d = System.DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-                                    if (d.Year == holiday.Year &&
-                                        d.Month == holiday.Month &&
-                                        d.Date == holiday.Date)
-                                    {
-                                        isHoliday = true;
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-
-                    if (date != null)
-                    {
-                        DateTime d = System.DateTime.ParseExact(date, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-                        if (!isHoliday && (int)d.DayOfWeek == 1)
-                        {
-                            reduction = 35;
-                        }
-                    }
-
-                    // TODO apply reduction for others
-                    if (age != null && age < 15)
-                    {
-                        return "{ \"cost\": " + (int)Math.Ceiling(result * .7) + "}";
+                        double cost = basePrice * (1 - reduction / 100.0);
+                        return "{ \"cost\": " + (int)Math.Ceiling(cost) + "}";
                     }
                     else
                     {
-                        if (age == null || age <= 64)
-                        {
-                            double cost = result * (1 - reduction / 100.0);
-                            return "{ \"cost\": " + (int)Math.Ceiling(cost) + "}";
-                        }
-                        else
-                        {
-                            double cost = result * .75 * (1 - reduction / 100.0);
-                            return "{ \"cost\": " + (int)Math.Ceiling(cost) + "}";
-                        }
+                        double cost = basePrice * .75 * (1 - reduction / 100.0);
+                        return "{ \"cost\": " + (int)Math.Ceiling(cost) + "}";
+                    }
+                }
+            }
+            else
+            {
+                if (age != null && age >= 6)
+                {
+                    if (age > 64)
+                    {
+                        return "{ \"cost\": " + (int)Math.Ceiling(basePrice * .4) + "}";
+                    }
+                    else
+                    {
+                        return "{ \"cost\": " + basePrice + "}";
                     }
                 }
                 else
                 {
-                    if (age != null && age >= 6)
-                    {
-                        if (age > 64)
-                        {
-                            return "{ \"cost\": " + (int)Math.Ceiling(result * .4) + "}";
-                        }
-                        else
-                        {
-                            return "{ \"cost\": " + result + "}";
-                        }
-                    }
-                    else
-                    {
-                        return "{ \"cost\": 0}";
-                    }
+                    return "{ \"cost\": 0}";
                 }
             }
         }
+    }
+
+    private bool IsHolidays(DateTime? date)
+    {
+        using (var holidayCmd = new MySqlCommand( //
+                            "SELECT * FROM holidays", connection))
+        {
+            holidayCmd.Prepare();
+            using (var holidays = holidayCmd.ExecuteReader())
+            {
+                while (holidays.Read())
+                {
+                    var holiday = holidays.GetDateTime("holiday");
+                    if (date.HasValue && date.Value.Equals(holiday))
+                    {
+                        return true;
+                    }
+                }
+
+            }
+        }
+
+        return false;
+    }
+
+    private double GetBasePrice(object type)
+    {
+        double basePrice;
+        using (var costCmd = new MySqlCommand( //
+    "SELECT cost FROM base_price " + //
+    "WHERE type = @type", connection))
+        {
+            costCmd.Parameters.AddWithValue("@type", type);
+            costCmd.Prepare();
+            basePrice = (int)costCmd.ExecuteScalar();
+        }
+
+        return basePrice;
     }
 
     public string AddPrice(string liftPassType, int liftPassCost)

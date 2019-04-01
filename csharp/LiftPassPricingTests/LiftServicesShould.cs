@@ -35,11 +35,11 @@ public class LiftServicesShould
                 .Cast<int?>()
                 .Concat(new int?[] { null })
                 .SelectMany(age => types.SelectMany(type => {
-                    var date = new DateTime(random.Next(2017, 2019), random.Next(1, 12), random.Next(1, 28)).ToString("yyyy-MM-dd");
+                    var date = new DateTime(random.Next(2017, 2019), random.Next(1, 12), random.Next(1, 28));
                     return new [] {
-                        $"- {age}, {type}, {date}\n",
+                        $"- {age}, {type}, {date.ToString("yyyy-MM-dd")}\n",
                         liftServices.GetPrice(age, type, date) + "\n",
-                        liftServices.GetPrice(age, type, "2019-02-18") + "\n"
+                        liftServices.GetPrice(age, type, DateTime.Parse("2019-02-18")) + "\n"
                     };
                 }));
 
