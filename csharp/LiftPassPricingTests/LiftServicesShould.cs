@@ -45,4 +45,33 @@ public class LiftServicesShould
 
         Approvals.Verify(string.Concat(result));
     }
+
+    [Property]
+    public void ReturnPriceForSeveralPerson(DateTime? date, bool isHolidays, uint basePrice)
+    {
+        var ages = new [] { 3, 7, 14, 35, 38, 65 };
+        var liftPricer = new LiftPricer(date, isHolidays, (int)basePrice);
+        var ratio = (!date.HasValue || (int)date.Value.DayOfWeek != 1 || isHolidays ? 1 : 0.65);
+
+        var totalPrice = liftPricer.GetPrice(ages);
+
+        totalPrice.Should().Be(
+            0 + 2 * (int)Math.Ceiling(basePrice * 0.7)
+            + 2 * (int)Math.Ceiling(basePrice * ratio)
+            + (int)Math.Ceiling(basePrice * 0.75 * ratio));
+    }
+
+    [Property]
+    public void ReturnNightPriceForSeveralPerson(DateTime? date, bool isHolidays, uint basePrice)
+    {
+        var ages = new [] { 3, 7, 14, 35, 38, 65 };
+        var liftPricer = new NightLiftPricer(date, (int)basePrice);
+        var ratio = (!date.HasValue || (int)date.Value.DayOfWeek != 1 || isHolidays ? 1 : 0.65);
+
+        var totalPrice = liftPricer.GetPrice(ages);
+
+        totalPrice.Should().Be(
+            0 + 4 * (int)basePrice
+            + (int)Math.Ceiling(basePrice * 0.4));
+    }
 }

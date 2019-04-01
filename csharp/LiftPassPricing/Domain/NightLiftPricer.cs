@@ -1,6 +1,6 @@
 using System;
 
-internal class NightLiftPricer : IPriceLift
+public class NightLiftPricer : BaseLiftPricer
 {
     private DateTime? date;
     private int basePrice;
@@ -11,7 +11,7 @@ internal class NightLiftPricer : IPriceLift
         this.basePrice = basePrice;
     }
 
-    public int GetPrice(int? age)
+    public override int GetPrice(int? age)
     {
         if (age == null || age < 6)
         {

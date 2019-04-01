@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
-public class LiftPricer : IPriceLift
+public class LiftPricer : BaseLiftPricer
 {
     private DateTime? date;
     private bool isHolidays;
@@ -13,7 +15,7 @@ public class LiftPricer : IPriceLift
         this.basePrice = basePrice;
     }
 
-    public int GetPrice(int? age)
+    public override int GetPrice(int? age)
     {
         if (age != null && age < 6)
         {
