@@ -20,7 +20,7 @@ public class LiftServicesShould
                 ConnectionString = @"Database=lift_pass;Data Source=localhost;User Id=root;Password=mysql"
             };
         connection.Open();
-        liftServices = new LiftServices(connection);
+        liftServices = new LiftServices(connection, new LiftPricerRepository(connection));
         random = new Random(1); 
     }
 
