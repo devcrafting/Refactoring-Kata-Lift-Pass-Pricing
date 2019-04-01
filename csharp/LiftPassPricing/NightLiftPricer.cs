@@ -13,20 +13,16 @@ internal class NightLiftPricer : IPriceLift
 
     public int GetPrice(int? age)
     {
-        if (age != null && age >= 6)
-        {
-            if (age > 64)
-            {
-                return (int)Math.Ceiling(basePrice * .4);
-            }
-            else
-            {
-                return basePrice;
-            }
-        }
-        else
+        if (age == null || age < 6)
         {
             return 0;
         }
+
+        if (age > 64)
+        {
+            return (int)Math.Ceiling(basePrice * .4);
+        }
+
+        return basePrice;
     }
 }
