@@ -10,8 +10,12 @@ public class LiftPricerRepository : ILoadLiftPricer
         this.connection = connection;
     }
 
-    public LiftPricer Get(object type, DateTime? date) =>
-        new LiftPricer(type.ToString(), date, IsHolidays(date), GetBasePrice(type));
+    public IPriceLift Get(object type, DateTime? date)
+    {
+        if (type.ToString() == "night")
+            return new NightLiftPricer(date, GetBasePrice(type));
+        return new LiftPricer(date, IsHolidays(date), GetBasePrice(type));
+    }
 
     private bool IsHolidays(DateTime? date)
     {
